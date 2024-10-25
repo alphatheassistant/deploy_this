@@ -1,0 +1,16 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Remove outline for all elements */
+*:focus {
+  outline: none !important; /* Remove the default outline */
+}
+
+/* Alternatively, you can use this for better accessibility */
+*:focus-visible {
+  outline: none !important; /* Remove the default outline only for elements that are focused */
+}
