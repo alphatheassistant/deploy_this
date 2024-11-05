@@ -16,7 +16,7 @@ export function useImageLoader() {
 
     try {
       const response = await axios.get(
-        `https://api.unsplash.com/photos?page=${page}&per_page=${ITEMS_PER_PAGE}&client_id=${UNSPLASH_API_KEY}`
+        `https://search.apipoint.co/api/items?page=${page}&per_page=${ITEMS_PER_PAGE}`
       );
 
       const newImages = response.data
