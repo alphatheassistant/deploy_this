@@ -23,14 +23,14 @@ export function useImageLoader() {
         .filter((item: any) => !loadedImageIds.has(item.id))
         .map((item: any) => ({
           id: item.id,
-          title: item.description || 'Untitled',
-          url: item.urls.regular,
-          prompt: item.alt_description || 'No description available',
+          title: item.title || 'Untitled',
+          url: item.url,
+          prompt: item.prompt || 'No description available',
           model: 'Unsplash',
-          creator: item.user.name,
+          creator: item.creator,
           likes: item.likes,
-          comments: Math.floor(Math.random() * 100),
-          tags: item.tags?.map((tag: any) => tag.title) || [],
+          comments: item.comments,
+          tags: item.tags?.map((tag: any) => tag) || [],
         }));
 
       if (newImages.length > 0) {
