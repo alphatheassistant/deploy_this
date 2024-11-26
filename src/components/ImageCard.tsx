@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Bot, Heart, MessageSquare } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import type { Image } from '@/types';
 
 interface ImageCardProps {
@@ -9,7 +9,7 @@ interface ImageCardProps {
 
 export function ImageCard({ image, onClick }: ImageCardProps) {
   return (
-    <Card className="group overflow-hidden">
+    <Card className="group overflow-hidden sm:rounded-lg rounded-none border sm:border">
       <div onClick={onClick} className="relative aspect-square cursor-pointer">
         <img
           src={image.url}
@@ -28,18 +28,10 @@ export function ImageCard({ image, onClick }: ImageCardProps) {
                 ? `${image.prompt.substring(0, 37.5)}..`
                 : image.prompt}
             </p>
-            <div className="flex items-center justify-between text-white/80">
+            <div className="flex items-center text-white/80">
               <div className="flex items-center gap-1 text-sm">
                 <Bot className="w-3 h-3" />
                 <span>{image.model}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <span className="flex items-center gap-1">
-                  <Heart className="w-3 h-3" /> {image.likes}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MessageSquare className="w-3 h-3" /> {image.comments}
-                </span>
               </div>
             </div>
           </div>
