@@ -1,10 +1,11 @@
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bot, Download, Heart, MessageSquare, Share2, Wand2 } from 'lucide-react';
+import { Bot, Download, Share2, Wand2 } from 'lucide-react';
 import { CopyButton } from './CopyButton';
+import { useToast } from '@/hooks/use-toast';
 import type { Image } from '@/types';
 
 interface ImageDialogProps {
@@ -14,26 +15,79 @@ interface ImageDialogProps {
 }
 
 export function ImageDialog({ image, open, onOpenChange }: ImageDialogProps) {
+  const { toast } = useToast();
+  
   if (!image) return null;
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(image.url);
+      if (!response.ok) throw new Error('Failed to fetch image');
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${image.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      toast({
+        title: 'Success',
+        description: 'Image downloaded successfully',
+      });
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to download image',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: image.title,
+          text: image.prompt,
+          url: image.url,
+        });
+      } else {
+        await navigator.clipboard.writeText(image.url);
+        toast({
+          title: 'Success',
+          description: 'Image URL copied to clipboard',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing image:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to share image',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl p-0 gap-0 sm:max-h-[96vh] max-h-screen">
-        <DialogTitle className="sr-only">Image Details - {image.title}</DialogTitle>
-        <div className="grid lg:grid-cols-2 grid-cols-1 lg:h-[88.3vh] h-auto">
-          <Card className="rounded-3xl lg:h-full h-[33vh] lg:rounded-r-none">
-            <div className="rounded-3xl relative h-full bg-white flex items-center justify-center">
-              <img
-                src={image.url}
-                alt={image.title}
-                className="rounded-l h-full w-full object-contain"
-                style={{ borderRadius: '.75rem 0 0 .75rem' }}
-              />
-            </div>
-          </Card>
+      <DialogContent className="max-w-6xl p-0 gap-0 sm:max-h-[96vh] max-h-screen sm:rounded-lg rounded-none border-0 sm:border">
+        <div className="grid lg:grid-cols-2 grid-cols-1 h-full">
+          <div className="lg:sticky lg:top-0 h-[40vh] lg:h-[88vh] overflow-hidden">
+            <img
+              src={image.url}
+              alt={image.title}
+              className="h-full w-full object-cover lg:object-contain"
+            />
+          </div>
 
-          <Card className="lg:h-full h-auto lg:rounded-l-none lg:border-l-0">
-            <ScrollArea className="h-full max-h-[40vh] lg:max-h-full">
+          <Card className="lg:rounded-l-none lg:rounded-r-lg sm:rounded-b-lg rounded-none border-0 sm:border lg:border-l-0">
+            <ScrollArea className="h-full max-h-[60vh] lg:max-h-[88vh]">
               <div className="p-6 space-y-6">
                 <div>
                   <h2 className="text-2xl font-semibold mb-2">{image.title}</h2>
@@ -78,27 +132,23 @@ export function ImageDialog({ image, open, onOpenChange }: ImageDialogProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Heart className="w-4 h-4" />
-                      {image.likes}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <MessageSquare className="w-4 h-4" />
-                      {image.comments}
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" className="gap-2">
-                      <Share2 className="w-4 h-4" />
-                      Share
-                    </Button>
-                    <Button variant="default" className="gap-2">
-                      <Download className="w-4 h-4" />
-                      Download
-                    </Button>
-                  </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+                  <Button
+                    variant="default"
+                    className="w-full gap-2"
+                    onClick={handleDownload}
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </Button>
                 </div>
               </div>
             </ScrollArea>
